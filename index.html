@@ -299,7 +299,10 @@ input[type="date"]:focus{
   z-index:50;
   pointer-events:none;
   background-repeat:no-repeat;
-  transition:transform .48s cubic-bezier(.22,.68,.36,1), box-shadow .48s ease;
+  will-change:transform;
+  backface-visibility:hidden;
+  transform:translateZ(0);
+  transition:transform .55s cubic-bezier(.33,1,.68,1);
 }
 
 .puzzle-fadeout{
@@ -357,6 +360,7 @@ input[type="date"]:focus{
 }
 
 .letter-card{
+  display:none; /* aucune préview : la carte n'existe pas dans le flux avant le déblocage */
   background:var(--white);
   border-radius:var(--radius-lg);
   box-shadow:var(--shadow-soft);
@@ -664,7 +668,7 @@ function isSolved() {
 
 /* ------------------ Sélection et échange (avec animation "vol") ------------------ */
 function handleTileActivate(index) {
-  if (locked) return;
+  if (locked || isAnimating) return;
   const tiles = grid.children;
   const tileEl = tiles[index];
 
@@ -687,7 +691,11 @@ function handleTileActivate(index) {
   swapWithAnimation(firstIndex, index);
 }
 
+let isAnimating = false;
+
 function swapWithAnimation(indexA, indexB) {
+  isAnimating = true;
+
   const tiles = grid.children;
   const tileA = tiles[indexA];
   const tileB = tiles[indexB];
@@ -698,31 +706,37 @@ function swapWithAnimation(indexA, indexB) {
   // ghosts pour l'effet visuel de "vol" entre les deux cases
   const ghostA = createGhost(tileA, rectA);
   const ghostB = createGhost(tileB, rectB);
+  ghostA.style.transform = "translate(0px, 0px)";
+  ghostB.style.transform = "translate(0px, 0px)";
   document.body.appendChild(ghostA);
   document.body.appendChild(ghostB);
 
   tileA.classList.add("swap-hidden");
   tileB.classList.add("swap-hidden");
 
-  // on échange déjà les données, les vraies cases seront correctes
+  // on échange déjà les données ; les vraies cases seront correctes
   // une fois révélées après l'animation
   [positions[indexA], positions[indexB]] = [positions[indexB], positions[indexA]];
   applyTileStyle(tileA, positions[indexA]);
   applyTileStyle(tileB, positions[indexB]);
-
-  // force reflow avant de lancer la transition des ghosts
-  void ghostA.offsetWidth;
 
   const dxAtoB = rectB.left - rectA.left;
   const dyAtoB = rectB.top - rectA.top;
   const dxBtoA = rectA.left - rectB.left;
   const dyBtoA = rectA.top - rectB.top;
 
-  ghostA.style.transform = `translate(${dxAtoB}px, ${dyAtoB}px) scale(1.06) rotate(4deg)`;
-  ghostB.style.transform = `translate(${dxBtoA}px, ${dyBtoA}px) scale(1.06) rotate(-4deg)`;
+  // double rAF : on laisse le navigateur peindre l'état de départ des
+  // ghosts avant de déclencher la transition, pour un mouvement net (60fps)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      ghostA.style.transform = `translate(${dxAtoB}px, ${dyAtoB}px) scale(1.05) rotate(3deg)`;
+      ghostB.style.transform = `translate(${dxBtoA}px, ${dyBtoA}px) scale(1.05) rotate(-3deg)`;
+    });
+  });
 
   let finished = 0;
-  const onDone = () => {
+  const onDone = (e) => {
+    if (e.propertyName && e.propertyName !== "transform") return;
     finished++;
     if (finished < 2) return;
     ghostA.remove();
@@ -736,6 +750,7 @@ function swapWithAnimation(indexA, indexB) {
       tileB.classList.remove("solved-pop");
     }, 500);
 
+    isAnimating = false;
     checkWin();
   };
 
@@ -838,7 +853,15 @@ function unlockLetter() {
   lockedCard.style.opacity = "0";
   setTimeout(() => {
     lockedCard.style.display = "none";
-    letterCard.classList.add("revealed");
+
+    // on redonne d'abord sa place dans la page (ce qui fait apparaître
+    // la zone à faire défiler), puis on lance le fondu d'apparition
+    letterCard.style.display = "block";
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        letterCard.classList.add("revealed");
+      });
+    });
   }, 500);
 }
 </script>
