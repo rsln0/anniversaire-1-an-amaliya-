@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>solve our little picture ♡</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+
 <style>
 /* ============================================================
    TOKENS — palette douce et romantique
@@ -21,9 +25,13 @@
   --ink:          #4a3f3a;
   --white:        #ffffff;
 
-  --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --paper:        #fbf5e9;
+  --paper-deep:   #f2e7d3;
+  --paper-ink:    #3d2f26;
+
+  --font-display: 'EB Garamond', Georgia, 'Iowan Old Style', serif;
   --font-body:    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-script:  'Segoe Script', 'Bradley Hand', 'Brush Script MT', 'Lucida Handwriting', cursive;
+  --font-letter:  'Cormorant Garamond', Georgia, serif;
 
   --shadow-soft:  0 10px 30px rgba(74,63,58,0.08);
   --shadow-tile:  0 4px 14px rgba(74,63,58,0.12);
@@ -56,7 +64,6 @@ body{
 
 ::selection{ background:var(--pink); color:var(--ink); }
 
-/* Focus visible partout, pour accessibilité clavier */
 :focus-visible{
   outline:3px solid var(--rose-line);
   outline-offset:3px;
@@ -64,18 +71,27 @@ body{
 }
 
 /* ============================================================
-   DÉCOR — fleurs roses translucides dans les coins
+   DÉCOR DE FOND — fixe, doux, jamais distrayant
    ============================================================ */
-.corner-flower{
+.bg-decor{
   position:fixed;
-  width:min(38vw, 320px);
-  height:min(38vw, 320px);
+  inset:0;
   pointer-events:none;
-  opacity:0.35;
   z-index:0;
+  overflow:hidden;
 }
-.corner-flower.top-left{ top:-8%; left:-8%; }
-.corner-flower.bottom-right{ bottom:-8%; right:-8%; transform:rotate(180deg); }
+
+.corner-flower{
+  position:absolute;
+  width:min(42vw, 360px);
+  height:min(42vw, 360px);
+  opacity:0.30;
+  filter:blur(1px);
+}
+.corner-flower.top-left{ top:-10%; left:-10%; }
+.corner-flower.top-right{ top:-12%; right:-12%; transform:rotate(60deg); opacity:0.20; }
+.corner-flower.bottom-right{ bottom:-10%; right:-10%; transform:rotate(180deg); }
+.corner-flower.bottom-left{ bottom:-12%; left:-12%; transform:rotate(-70deg); opacity:0.18; }
 
 .petal{
   position:absolute;
@@ -100,6 +116,24 @@ body{
   left:42%;
   background:radial-gradient(circle, var(--pink-strong), var(--rose-line));
   border-radius:50%;
+}
+
+/* quelques pétales ambiants qui flottent très lentement, en permanence */
+.ambient-petal{
+  position:absolute;
+  top:-6%;
+  font-size:1rem;
+  color:var(--pink-strong);
+  opacity:0.35;
+  animation-name:ambientFloat;
+  animation-timing-function:linear;
+  animation-iteration-count:infinite;
+  filter:blur(0.3px);
+}
+@keyframes ambientFloat{
+  0%{   transform:translateY(0) translateX(0) rotate(0deg); }
+  50%{  transform:translateY(50vh) translateX(14px) rotate(160deg); }
+  100%{ transform:translateY(108vh) translateX(-8px) rotate(320deg); }
 }
 
 /* ============================================================
@@ -283,9 +317,7 @@ input[type="date"]:focus{
 }
 .tile.swap-hidden{ opacity:0; pointer-events:none; }
 .tile.locked{ cursor:default; }
-.tile.solved-pop{
-  animation:solvedPop .5s ease;
-}
+.tile.solved-pop{ animation:solvedPop .5s ease; }
 @keyframes solvedPop{
   0%{ transform:scale(1); }
   40%{ transform:scale(1.05); }
@@ -306,7 +338,7 @@ input[type="date"]:focus{
 }
 
 .puzzle-fadeout{
-  animation:puzzleZoomOut var(--success-duration, 1.8s) ease forwards;
+  animation:puzzleZoomOut var(--puzzle-fade-duration, 0.9s) ease forwards;
 }
 @keyframes puzzleZoomOut{
   0%{   transform:scale(1);    opacity:1; }
@@ -314,7 +346,7 @@ input[type="date"]:focus{
   100%{ transform:scale(1.12); opacity:0; }
 }
 
-/* pluie de pétales / cœurs — CSS uniquement */
+/* pluie de pétales de victoire — CSS uniquement */
 .petal-rain{
   position:fixed;
   inset:0;
@@ -338,12 +370,16 @@ input[type="date"]:focus{
 }
 
 /* ============================================================
-   LETTRE
+   LETTRE — la scène de révélation
    ============================================================ */
-.letter-zone{
+.letter-stage{
+  position:relative;
   width:100%;
+  min-height:60vh;
   display:flex;
   justify-content:center;
+  align-items:flex-start;
+  padding-top:2vh;
 }
 
 .locked-card{
@@ -357,66 +393,143 @@ input[type="date"]:focus{
   color:var(--gray);
   font-size:1rem;
   letter-spacing:0.02em;
+  margin:0 auto;
 }
 
+/* pétales pendant l'écriture — deux couches, devant / derrière la lettre */
+.letter-petals{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+}
+.letter-petals.behind{ z-index:2; }
+.letter-petals.front{ z-index:6; }
+.writing-petal{
+  position:absolute;
+  top:-5%;
+  color:var(--pink-strong);
+  opacity:0.5;
+  filter:blur(0.3px);
+  animation-name:writingPetalFall;
+  animation-timing-function:linear;
+  animation-fill-mode:forwards;
+}
+@keyframes writingPetalFall{
+  0%{   transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
+  8%{   opacity:0.55; }
+  92%{  opacity:0.4; }
+  100%{ transform:translateY(115vh) translateX(24px) rotate(200deg); opacity:0; }
+}
+
+/* la feuille de papier elle-même */
 .letter-card{
-  display:none; /* aucune préview : la carte n'existe pas dans le flux avant le déblocage */
-  background:var(--white);
-  border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-soft);
-  padding:2.6rem 2rem;
-  width:100%;
-  max-width:460px;
+  position:relative;
+  z-index:5;
+  display:none;
+  width:700px;
+  max-width:90vw;
+  background:
+    radial-gradient(ellipse at 20% 15%, rgba(255,255,255,0.55), transparent 55%),
+    linear-gradient(165deg, var(--paper) 0%, var(--paper-deep) 100%);
+  border-radius:3px 10px 4px 12px / 9px 4px 11px 3px;
+  box-shadow:
+    0 2px 4px rgba(61,47,38,0.10),
+    0 18px 40px rgba(61,47,38,0.16),
+    0 1px 0 rgba(255,255,255,0.4) inset;
+  padding:3.4rem 3rem;
   opacity:0;
-  transform:translateY(24px);
-  transition:opacity .9s ease, transform .9s cubic-bezier(.22,.68,.36,1);
+  transform:translateY(38vh) rotate(0deg);
+  transition:
+    opacity var(--letter-rise-duration, 1.1s) ease,
+    transform var(--letter-rise-duration, 1.1s) cubic-bezier(.19,.9,.28,1);
 }
 .letter-card.revealed{
   opacity:1;
-  transform:translateY(0);
+  /* --final-rotation is set inline in JS to a random value between -1deg and 1deg */
+  transform:translateY(0) rotate(var(--final-rotation, 0deg));
+}
+
+/* grain de papier subtil */
+.letter-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  opacity:0.5;
+  mix-blend-mode:multiply;
+  pointer-events:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.24  0 0 0 0 0.19  0 0 0 0 0.15  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size:120px 120px;
+}
+
+/* bords très légèrement irréguliers, simulés en douceur */
+.letter-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  pointer-events:none;
+  box-shadow:
+    inset 0 0 0 1px rgba(61,47,38,0.05),
+    inset 0 0 18px rgba(61,47,38,0.03);
 }
 
 .letter-heart{
   text-align:center;
   color:var(--pink-strong);
-  font-size:1.5rem;
-  margin-bottom:0.6rem;
+  font-size:1.4rem;
+  margin-bottom:1rem;
+  opacity:0.85;
 }
 
 .letter-body{
-  font-family:var(--font-script);
-  font-size:1.35rem;
-  line-height:1.9;
-  color:var(--ink);
+  position:relative;
+  font-family:var(--font-letter);
+  font-size:1.4rem;
+  line-height:1.95;
+  color:var(--paper-ink);
+  text-align:justify;
+  white-space:pre-wrap;
+  min-height:1.95em;
 }
 
-.letter-line{
-  margin:0 0 0.9rem 0;
-  opacity:0;
-  transform:translateY(10px);
-  animation:lineReveal .7s ease forwards;
-}
-@keyframes lineReveal{
-  to{ opacity:1; transform:translateY(0); }
-}
-
-.letter-signature{
-  text-align:right;
-  font-family:var(--font-script);
-  font-size:1.5rem;
+.type-cursor{
+  display:inline-block;
   color:var(--rose-line);
-  margin-top:1.2rem;
+  font-weight:400;
+  animation:cursorBlink 1s step-start infinite;
+}
+.type-cursor.done{ display:none; }
+@keyframes cursorBlink{
+  0%, 49%{ opacity:1; }
+  50%, 100%{ opacity:0; }
+}
+
+.letter-continue-wrap{
+  display:flex;
+  justify-content:center;
+  margin-top:2.2rem;
+  opacity:0;
+  transform:translateY(14px);
+  transition:opacity .7s ease, transform .7s cubic-bezier(.22,.68,.36,1);
+  pointer-events:none;
+}
+.letter-continue-wrap.show{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
 }
 
 /* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width:520px){
-  .gate-card, .letter-card, .locked-card{ padding:1.8rem 1.3rem; }
+  .gate-card, .locked-card{ padding:1.8rem 1.3rem; }
+  .letter-card{ padding:2.2rem 1.5rem; }
   .letter-body{ font-size:1.2rem; }
 }
 
-/* Respecte les préférences de mouvement réduit */
 @media (prefers-reduced-motion: reduce){
   *{
     animation-duration:0.001ms !important;
@@ -428,16 +541,29 @@ input[type="date"]:focus{
 </head>
 <body>
 
-<!-- Décor fixe : fleurs roses translucides -->
-<div class="corner-flower top-left" aria-hidden="true">
-  <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-  <div class="petal"></div><div class="petal"></div>
-  <div class="flower-center"></div>
-</div>
-<div class="corner-flower bottom-right" aria-hidden="true">
-  <div class="petal"></div><div class="petal"></div><div class="petal"></div>
-  <div class="petal"></div><div class="petal"></div>
-  <div class="flower-center"></div>
+<!-- Décor fixe : fleurs de cerisier dans les coins + pétales ambiants -->
+<div class="bg-decor" aria-hidden="true" id="bgDecor">
+  <div class="corner-flower top-left">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="petal"></div><div class="petal"></div>
+    <div class="flower-center"></div>
+  </div>
+  <div class="corner-flower top-right">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="petal"></div><div class="petal"></div>
+    <div class="flower-center"></div>
+  </div>
+  <div class="corner-flower bottom-right">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="petal"></div><div class="petal"></div>
+    <div class="flower-center"></div>
+  </div>
+  <div class="corner-flower bottom-left">
+    <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+    <div class="petal"></div><div class="petal"></div>
+    <div class="flower-center"></div>
+  </div>
+  <!-- pétales ambiants injectés en JS -->
 </div>
 
 <main class="stage">
@@ -469,9 +595,18 @@ input[type="date"]:focus{
       <div class="puzzle-grid" id="puzzleGrid"></div>
     </div>
 
-    <div class="letter-zone">
+    <div class="letter-stage" id="letterStage">
       <div class="locked-card" id="lockedCard">🔒 Locked</div>
-      <article class="letter-card" id="letterCard"></article>
+      <!-- couches de pétales pendant l'écriture -->
+      <div class="letter-petals behind" id="petalsBehind"></div>
+      <article class="letter-card" id="letterCard">
+        <div class="letter-heart" aria-hidden="true">♡</div>
+        <div class="letter-body" id="letterBody"><span id="letterText"></span><span class="type-cursor" id="typeCursor">|</span></div>
+        <div class="letter-continue-wrap" id="continueWrap">
+          <button type="button" class="btn" id="continueBtn">Continue ♡</button>
+        </div>
+      </article>
+      <div class="letter-petals front" id="petalsFront"></div>
     </div>
   </section>
 
@@ -479,7 +614,7 @@ input[type="date"]:focus{
 
 <script>
 /* ==========================================================================
-   CONFIG — variables à modifier facilement
+   CONFIG — toutes les vitesses et délais regroupés ici
    ========================================================================== */
 const CONFIG = {
   rows: 4,
@@ -488,11 +623,24 @@ const CONFIG = {
   title: "solve our little picture ♡",
   subtitle: "Tap two tiles to swap them. The page unlocks when the picture is complete.",
   lockedText: "🔒 Locked",
-  successDuration: 1800,     // en ms
 
   // Date à deviner pour ouvrir la page (format AAAA-MM-JJ)
   requiredDate: "2025-07-13",
-  gateWrongMessage: "Ce n'est pas encore la bonne date... essaie encore ♡"
+  gateWrongMessage: "Ce n'est pas encore la bonne date... essaie encore ♡",
+
+  // --- Timings de la scène de la lettre ---
+  puzzleFadeDuration: 900,      // ms — disparition du puzzle en fondu (avec léger zoom)
+  letterRiseDelay: 250,         // ms — délai avant que la lettre commence à monter
+  letterRiseDuration: 1100,     // ms — durée de la montée + apparition de la lettre
+  typingStartDelay: 350,        // ms — pause avant le début de l'écriture, une fois la lettre posée
+  typingCharsPerSecond: 32,     // 25–40 caractères / seconde
+  typingJitter: 0.35,           // variation aléatoire du rythme (0 = régulier, 1 = très irrégulier)
+  continueButtonDelay: 500,     // ms — délai avant l'apparition du bouton, une fois l'écriture finie
+
+  // --- Pétales ---
+  ambientPetalCount: 6,         // pétales de fond, en continu, très lents
+  writingPetalCount: 5,         // pétales pendant l'écriture de la lettre (peu, lents)
+  writingPetalSpawnInterval: 1400 // ms — intervalle entre deux pétales pendant l'écriture
 };
 
 // Musique en option (désactivée par défaut)
@@ -500,10 +648,9 @@ const ENABLE_MUSIC = false;
 const MUSIC_SRC = "music.mp3";
 
 /* ==========================================================================
-   LETTRE — à modifier ici
+   LETTRE — à modifier ici, uniquement cette variable
    ========================================================================== */
-const LETTER = `
-My love,
+const LETTER = `My love,
 
 Every day with you feels like a little miracle I get to unwrap all over again.
 
@@ -513,8 +660,7 @@ This little puzzle was never really about the picture. It was just an excuse to 
 
 Thank you for choosing me, again and again.
 
-Forever yours.
-`;
+Forever yours.`;
 
 /* ==========================================================================
    INITIALISATION DU TEXTE D'EN-TÊTE
@@ -522,7 +668,27 @@ Forever yours.
 document.getElementById("mainTitle").textContent = CONFIG.title;
 document.getElementById("mainSubtitle").textContent = CONFIG.subtitle;
 document.getElementById("lockedCard").textContent = CONFIG.lockedText;
-document.documentElement.style.setProperty("--success-duration", (CONFIG.successDuration / 1000) + "s");
+document.documentElement.style.setProperty("--puzzle-fade-duration", (CONFIG.puzzleFadeDuration / 1000) + "s");
+document.documentElement.style.setProperty("--letter-rise-duration", (CONFIG.letterRiseDuration / 1000) + "s");
+
+/* ==========================================================================
+   PÉTALES AMBIANTS DE FOND (permanents, très lents, discrets)
+   ========================================================================== */
+(function spawnAmbientPetals(){
+  const layer = document.getElementById("bgDecor");
+  const symbols = ["❀", "✿", "♡"];
+  for (let i = 0; i < CONFIG.ambientPetalCount; i++) {
+    const p = document.createElement("span");
+    p.className = "ambient-petal";
+    p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    p.style.left = (Math.random() * 96 + 2) + "vw";
+    const duration = 26 + Math.random() * 18; // très lent
+    p.style.animationDuration = duration + "s";
+    p.style.animationDelay = (-Math.random() * duration) + "s";
+    p.style.fontSize = (0.8 + Math.random() * 0.7) + "rem";
+    layer.appendChild(p);
+  }
+})();
 
 /* ==========================================================================
    ÉTAPE 1 : LA PORTE DE LA DATE
@@ -540,16 +706,13 @@ gateForm.addEventListener("submit", function (e) {
   e.preventDefault();
 
   if (dateInput.value === CONFIG.requiredDate) {
-    // bonne date : on passe à l'étape du puzzle
     gateScreen.classList.add("hidden");
     puzzleScreen.classList.remove("hidden");
     initPuzzle();
     maybeStartMusic();
   } else {
-    // mauvaise date : petite secousse + message
     gateError.classList.add("show");
     gateCard.classList.remove("shake");
-    // force reflow pour rejouer l'animation
     void gateCard.offsetWidth;
     gateCard.classList.add("shake");
   }
@@ -569,7 +732,7 @@ function maybeStartMusic() {
   const startOnce = () => {
     if (musicStarted) return;
     musicStarted = true;
-    audioEl.play().catch(() => {/* lecture bloquée par le navigateur, on ignore */});
+    audioEl.play().catch(() => {});
     document.removeEventListener("click", startOnce);
     document.removeEventListener("keydown", startOnce);
   };
@@ -587,7 +750,6 @@ const rows = CONFIG.rows;
 const cols = CONFIG.cols;
 const total = rows * cols;
 
-// positions[i] = index de la pièce actuellement affichée à la position i
 let positions = [];
 let selectedIndex = null;
 let locked = false;
@@ -622,8 +784,6 @@ function initPuzzle() {
   renderAllTiles();
 }
 
-// Mélange par échanges successifs : toujours résoluble puisqu'un échange
-// est sa propre opération inverse (pas de contrainte de parité).
 function shufflePositions() {
   const shuffleCount = total * 6;
   do {
@@ -632,7 +792,7 @@ function shufflePositions() {
       const b = Math.floor(Math.random() * total);
       [positions[a], positions[b]] = [positions[b], positions[a]];
     }
-  } while (isSolved()); // on s'assure que ce n'est pas déjà résolu
+  } while (isSolved());
 }
 
 function pieceBackgroundStyle(pieceIndex) {
@@ -703,7 +863,6 @@ function swapWithAnimation(indexA, indexB) {
   const rectA = tileA.getBoundingClientRect();
   const rectB = tileB.getBoundingClientRect();
 
-  // ghosts pour l'effet visuel de "vol" entre les deux cases
   const ghostA = createGhost(tileA, rectA);
   const ghostB = createGhost(tileB, rectB);
   ghostA.style.transform = "translate(0px, 0px)";
@@ -714,8 +873,6 @@ function swapWithAnimation(indexA, indexB) {
   tileA.classList.add("swap-hidden");
   tileB.classList.add("swap-hidden");
 
-  // on échange déjà les données ; les vraies cases seront correctes
-  // une fois révélées après l'animation
   [positions[indexA], positions[indexB]] = [positions[indexB], positions[indexA]];
   applyTileStyle(tileA, positions[indexA]);
   applyTileStyle(tileB, positions[indexB]);
@@ -725,8 +882,6 @@ function swapWithAnimation(indexA, indexB) {
   const dxBtoA = rectA.left - rectB.left;
   const dyBtoA = rectA.top - rectB.top;
 
-  // double rAF : on laisse le navigateur peindre l'état de départ des
-  // ghosts avant de déclencher la transition, pour un mouvement net (60fps)
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       ghostA.style.transform = `translate(${dxAtoB}px, ${dyAtoB}px) scale(1.05) rotate(3deg)`;
@@ -785,8 +940,8 @@ function checkWin() {
 
   setTimeout(() => {
     wrapper.style.display = "none";
-    unlockLetter();
-  }, CONFIG.successDuration);
+    revealLetterScene();
+  }, CONFIG.puzzleFadeDuration);
 }
 
 function spawnPetalRain() {
@@ -814,56 +969,115 @@ function spawnPetalRain() {
 }
 
 /* ==========================================================================
-   ÉTAPE 3 : DÉBLOCAGE DE LA LETTRE
+   ÉTAPE 3 : LA SCÈNE DE LA LETTRE
    ========================================================================== */
-const lockedCard = document.getElementById("lockedCard");
-const letterCard = document.getElementById("letterCard");
+const lockedCard    = document.getElementById("lockedCard");
+const letterCard    = document.getElementById("letterCard");
+const letterTextEl  = document.getElementById("letterText");
+const typeCursor    = document.getElementById("typeCursor");
+const continueWrap  = document.getElementById("continueWrap");
+const continueBtn   = document.getElementById("continueBtn");
+const petalsBehind  = document.getElementById("petalsBehind");
+const petalsFront   = document.getElementById("petalsFront");
 
-function buildLetterMarkup() {
-  const rawLines = LETTER.trim().split("\n").map(l => l.trim());
-  let html = `<div class="letter-heart" aria-hidden="true">♡</div><div class="letter-body">`;
-  let lineCount = 0;
+let writingPetalTimer = null;
 
-  rawLines.forEach((line) => {
-    if (line.length === 0) return;
-    lineCount++;
-    const isSignature = /forever yours/i.test(line) || /^-\s?/.test(line);
-    const delay = (lineCount * 0.35).toFixed(2);
-    if (isSignature) {
-      html += `<p class="letter-line letter-signature" style="animation-delay:${delay}s">${escapeHtml(line)}</p>`;
-    } else {
-      html += `<p class="letter-line" style="animation-delay:${delay}s">${escapeHtml(line)}</p>`;
-    }
-  });
-
-  html += `</div>`;
-  return html;
-}
-
-function escapeHtml(str) {
-  const div = document.createElement("div");
-  div.textContent = str;
-  return div.innerHTML;
-}
-
-letterCard.innerHTML = buildLetterMarkup();
-
-function unlockLetter() {
-  lockedCard.style.transition = "opacity .5s ease";
+function revealLetterScene() {
+  // la case "verrouillée" s'efface en douceur
+  lockedCard.style.transition = "opacity .4s ease";
   lockedCard.style.opacity = "0";
+
   setTimeout(() => {
     lockedCard.style.display = "none";
 
-    // on redonne d'abord sa place dans la page (ce qui fait apparaître
-    // la zone à faire défiler), puis on lance le fondu d'apparition
+    // rotation finale aléatoire entre -1deg et +1deg, façon feuille posée
+    const finalRotation = (Math.random() * 2 - 1).toFixed(2) + "deg";
+    letterCard.style.setProperty("--final-rotation", finalRotation);
+
     letterCard.style.display = "block";
+
+    // on force le rendu de l'état de départ (translateY + opacity 0)
+    // avant de déclencher la transition vers l'état final
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         letterCard.classList.add("revealed");
       });
     });
-  }, 500);
+
+    // les pétales commencent à tomber doucement dès que la lettre apparaît
+    startWritingPetals();
+
+    setTimeout(() => {
+      startTypewriter();
+    }, CONFIG.letterRiseDelay + CONFIG.letterRiseDuration + CONFIG.typingStartDelay);
+
+  }, 400);
 }
+
+function startWritingPetals() {
+  const symbols = ["❀", "✿"];
+  let spawned = 0;
+
+  function spawnOne() {
+    if (spawned >= CONFIG.writingPetalCount * 4) return; // limite raisonnable dans la durée
+    spawned++;
+    const front = Math.random() < 0.5;
+    const layer = front ? petalsFront : petalsBehind;
+    const p = document.createElement("span");
+    p.className = "writing-petal";
+    p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    p.style.left = (Math.random() * 90 + 5) + "vw";
+    p.style.fontSize = (0.9 + Math.random() * 0.8) + "rem";
+    const duration = 9 + Math.random() * 6; // lent, presque imperceptible
+    p.style.animationDuration = duration + "s";
+    layer.appendChild(p);
+    setTimeout(() => p.remove(), duration * 1000 + 200);
+  }
+
+  spawnOne();
+  writingPetalTimer = setInterval(spawnOne, CONFIG.writingPetalSpawnInterval);
+}
+
+function stopWritingPetals() {
+  if (writingPetalTimer) {
+    clearInterval(writingPetalTimer);
+    writingPetalTimer = null;
+  }
+}
+
+function startTypewriter() {
+  const chars = Array.from(LETTER);
+  let i = 0;
+  const baseInterval = 1000 / CONFIG.typingCharsPerSecond;
+
+  function typeNext() {
+    if (i >= chars.length) {
+      typeCursor.classList.add("done");
+      stopWritingPetals();
+      setTimeout(showContinueButton, CONFIG.continueButtonDelay);
+      return;
+    }
+    letterTextEl.textContent += chars[i];
+    i++;
+
+    const jitterFactor = 1 + (Math.random() * 2 - 1) * CONFIG.typingJitter;
+    const delay = Math.max(8, baseInterval * jitterFactor);
+    setTimeout(typeNext, delay);
+  }
+
+  typeNext();
+}
+
+function showContinueButton() {
+  continueWrap.classList.add("show");
+}
+
+continueBtn.addEventListener("click", () => {
+  // point d'accroche pour la suite de l'expérience —
+  // pour l'instant, un petit remerciement discret
+  continueBtn.disabled = true;
+  continueBtn.textContent = "♡";
+});
 </script>
 
 </body>
