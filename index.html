@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -192,71 +192,180 @@ body{
    ÉCRAN "DATE GATE"
    ============================================================ */
 .gate-card{
-  background:var(--white);
-  border-radius:var(--radius-lg);
+  position:relative;
+  background:
+    radial-gradient(ellipse at 15% 0%, rgba(242,201,211,0.35), transparent 55%),
+    var(--white);
+  border-radius:28px;
   box-shadow:var(--shadow-soft);
-  padding:2.6rem 2rem;
+  padding:2.8rem 2.2rem 2.4rem;
   width:100%;
   max-width:420px;
   text-align:center;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:1.4rem;
+  gap:1.1rem;
+  border:1px solid rgba(226,160,182,0.35);
+  overflow:hidden;
+}
+
+/* double filigree frame, just inside the card edge */
+.gate-card::before{
+  content:"";
+  position:absolute;
+  inset:9px;
+  border:1px solid rgba(226,160,182,0.45);
+  border-radius:20px;
+  pointer-events:none;
+}
+
+.gate-ribbon{
+  font-family:var(--font-letter);
+  font-style:italic;
+  font-size:0.85rem;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  color:var(--rose-line);
+  margin:0 0 0.2rem;
+}
+
+.gate-ribbon::before,
+.gate-ribbon::after{
+  content:"✦";
+  display:inline-block;
+  margin:0 0.5em;
+  font-size:0.7em;
+  color:var(--pink-strong);
+  transform:translateY(-1px);
 }
 
 .gate-icon{
-  font-size:2rem;
-  color:var(--pink-strong);
+  position:relative;
+  width:56px;
+  height:56px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--white);
+  background:radial-gradient(circle at 35% 30%, var(--pink-strong), var(--rose-line) 75%);
+  border-radius:50%;
+  box-shadow:0 8px 20px rgba(217,140,166,0.45), inset 0 -3px 6px rgba(0,0,0,0.08);
+  font-size:1.5rem;
+  animation:heartPulse 2.6s ease-in-out infinite;
+}
+@keyframes heartPulse{
+  0%, 100%{ transform:scale(1); }
+  50%{ transform:scale(1.08); }
+}
+
+.gate-title{
+  font-family:var(--font-display);
+  font-size:1.3rem;
+  font-weight:500;
+  color:var(--ink);
+  margin:0.2rem 0 0;
 }
 
 .gate-label{
-  font-size:0.9rem;
+  font-family:var(--font-letter);
+  font-style:italic;
+  font-size:1.15rem;
   color:var(--gray);
-  margin:0;
+  margin:0 0 0.3rem;
+  line-height:1.5;
 }
 
 .gate-form{
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:1rem;
+  gap:1.2rem;
   width:100%;
+}
+
+.date-field{
+  position:relative;
+  width:100%;
+  max-width:250px;
+  display:flex;
+  align-items:center;
+  gap:0.6rem;
+  background:linear-gradient(180deg, var(--cream) 0%, var(--cream-deep) 100%);
+  border:1.5px solid var(--beige);
+  border-radius:999px;
+  padding:0.5rem 0.6rem 0.5rem 1rem;
+  transition:border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+.date-field:hover{
+  border-color:var(--pink-strong);
+  transform:translateY(-1px);
+}
+.date-field:focus-within{
+  border-color:var(--rose-line);
+  box-shadow:0 0 0 5px rgba(217,140,166,0.16), 0 6px 16px rgba(217,140,166,0.2);
+}
+
+.date-field-icon{
+  flex:none;
+  width:30px;
+  height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:var(--pink-soft);
+  color:var(--rose-line);
+  font-size:0.95rem;
 }
 
 input[type="date"]{
   font-family:var(--font-body);
   font-size:1rem;
   color:var(--ink);
-  background:var(--cream);
-  border:1.5px solid var(--beige);
-  border-radius:var(--radius-md);
-  padding:0.85rem 1.1rem;
+  background:transparent;
+  border:none;
+  padding:0.4rem 0.2rem;
   width:100%;
-  max-width:240px;
-  transition:border-color .25s ease, box-shadow .25s ease;
+  flex:1;
 }
-input[type="date"]:hover{ border-color:var(--pink-strong); }
-input[type="date"]:focus{
-  border-color:var(--rose-line);
-  box-shadow:0 0 0 4px rgba(217,140,166,0.15);
+input[type="date"]:focus{ outline:none; }
+input[type="date"]::-webkit-calendar-picker-indicator{
+  filter:invert(46%) sepia(24%) saturate(882%) hue-rotate(295deg) brightness(93%) contrast(89%);
+  cursor:pointer;
+  opacity:0.85;
 }
 
 .btn{
+  position:relative;
   font-family:var(--font-body);
   font-size:0.95rem;
   font-weight:600;
-  letter-spacing:0.02em;
+  letter-spacing:0.03em;
   color:var(--white);
   background:linear-gradient(135deg, var(--pink-strong), var(--rose-line));
   border:none;
   border-radius:999px;
-  padding:0.8rem 2.2rem;
+  padding:0.85rem 2.4rem;
   cursor:pointer;
   box-shadow:0 6px 16px rgba(217,140,166,0.35);
   transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+  display:inline-flex;
+  align-items:center;
+  gap:0.5rem;
+  overflow:hidden;
+}
+.btn::after{
+  content:"";
+  position:absolute;
+  top:0; left:-60%;
+  width:40%; height:100%;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,0.55), transparent);
+  transform:skewX(-20deg);
+  transition:left .6s ease;
 }
 .btn:hover{ transform:translateY(-2px); filter:brightness(1.04); }
+.btn:hover::after{ left:130%; }
 .btn:active{ transform:translateY(0); }
 
 .gate-error{
@@ -268,6 +377,30 @@ input[type="date"]:focus{
   transition:opacity .25s ease;
 }
 .gate-error.show{ opacity:1; }
+
+/* tiny hearts that drift up gently inside the card while the date field is focused */
+.gate-sparkle-layer{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  border-radius:inherit;
+}
+.gate-sparkle{
+  position:absolute;
+  bottom:-10%;
+  color:var(--pink-strong);
+  opacity:0;
+  font-size:0.85rem;
+  animation-name:sparkleRise;
+  animation-timing-function:ease-out;
+  animation-fill-mode:forwards;
+}
+@keyframes sparkleRise{
+  0%{   transform:translateY(0) scale(0.7); opacity:0; }
+  15%{  opacity:0.75; }
+  100%{ transform:translateY(-160px) scale(1); opacity:0; }
+}
 
 @keyframes shake{
   0%,100%{ transform:translateX(0); }
@@ -570,20 +703,26 @@ input[type="date"]:focus{
   <h1 class="title" id="mainTitle"></h1>
   <p class="subtitle" id="mainSubtitle"></p>
 
-  <!-- ÉCRAN 1 : la porte de la date -->
+  <!-- SCREEN 1: the date gate -->
   <section class="screen" id="gateScreen">
     <div class="gate-card">
+      <div class="gate-sparkle-layer" id="gateSparkleLayer" aria-hidden="true"></div>
+      <p class="gate-ribbon">A little secret, just for us</p>
       <div class="gate-icon" aria-hidden="true">♡</div>
-      <p class="gate-label">Quelle est la date qui compte, pour nous ?</p>
+      <p class="gate-title">Do you remember?</p>
+      <p class="gate-label">What's the date that matters, to us?</p>
       <form class="gate-form" id="gateForm">
-        <input
-          type="date"
-          id="dateInput"
-          aria-label="Entrer la date"
-          required
-        >
-        <button type="submit" class="btn">Entrer</button>
-        <p class="gate-error" id="gateError">Ce n'est pas encore la bonne date... essaie encore ♡</p>
+        <div class="date-field">
+          <span class="date-field-icon" aria-hidden="true">❀</span>
+          <input
+            type="date"
+            id="dateInput"
+            aria-label="Enter our special date"
+            required
+          >
+        </div>
+        <button type="submit" class="btn"><span aria-hidden="true">♡</span> Open it</button>
+        <p class="gate-error" id="gateError">That's not quite the right date... try again ♡</p>
       </form>
     </div>
   </section>
@@ -620,12 +759,12 @@ const CONFIG = {
   cols: 4,
   image: "photo.jpg",
   title: "solve our little picture ♡",
-  subtitle: 
+  subtitle: "A tiny puzzle, a little letter, and a lot of love.",
   lockedText: "🔒 Locked",
 
-  // Date à deviner pour ouvrir la page (format AAAA-MM-JJ)
+  // Date to guess to unlock the page (format YYYY-MM-DD)
   requiredDate: "2025-07-13",
-  gateWrongMessage: "Ce n'est pas encore la bonne date... essaie encore ♡",
+  gateWrongMessage: "That's not quite the right date... try again ♡",
 
   // --- Timings de la scène de la lettre ---
   puzzleFadeDuration: 900,      // ms — disparition du puzzle en fondu (avec léger zoom)
@@ -701,6 +840,31 @@ const gateCard    = document.querySelector(".gate-card");
 
 gateError.textContent = CONFIG.gateWrongMessage;
 
+/* tiny hearts that drift upward inside the card while the date field has focus */
+const gateSparkleLayer = document.getElementById("gateSparkleLayer");
+let sparkleTimer = null;
+
+function spawnGateSparkle() {
+  const s = document.createElement("span");
+  s.className = "gate-sparkle";
+  s.textContent = Math.random() < 0.5 ? "♡" : "❀";
+  s.style.left = (Math.random() * 80 + 10) + "%";
+  const duration = 2.4 + Math.random() * 1.4;
+  s.style.animationDuration = duration + "s";
+  gateSparkleLayer.appendChild(s);
+  setTimeout(() => s.remove(), duration * 1000 + 100);
+}
+
+dateInput.addEventListener("focus", () => {
+  if (sparkleTimer) return;
+  spawnGateSparkle();
+  sparkleTimer = setInterval(spawnGateSparkle, 500);
+});
+dateInput.addEventListener("blur", () => {
+  clearInterval(sparkleTimer);
+  sparkleTimer = null;
+});
+
 gateForm.addEventListener("submit", function (e) {
   e.preventDefault();
 
@@ -766,7 +930,7 @@ function initPuzzle() {
     tile.className = "tile";
     tile.tabIndex = 0;
     tile.setAttribute("role", "button");
-    tile.setAttribute("aria-label", "Pièce du puzzle");
+    tile.setAttribute("aria-label", "Puzzle piece");
     tile.dataset.position = i;
 
     tile.addEventListener("click", () => handleTileActivate(i));
