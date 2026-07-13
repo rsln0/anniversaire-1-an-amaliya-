@@ -638,21 +638,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{
   50%, 100%{ opacity:0; }
 }
 
-.letter-continue-wrap{
-  display:flex;
-  justify-content:center;
-  margin-top:2.2rem;
-  opacity:0;
-  transform:translateY(14px);
-  transition:opacity .7s ease, transform .7s cubic-bezier(.22,.68,.36,1);
-  pointer-events:none;
-}
-.letter-continue-wrap.show{
-  opacity:1;
-  transform:translateY(0);
-  pointer-events:auto;
-}
-
 /* ============================================================
    RESPONSIVE
    ============================================================ */
@@ -739,9 +724,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       <article class="letter-card" id="letterCard">
         <div class="letter-heart" aria-hidden="true">♡</div>
         <div class="letter-body" id="letterBody"><span id="letterText"></span><span class="type-cursor" id="typeCursor">|</span></div>
-        <div class="letter-continue-wrap" id="continueWrap">
-          <button type="button" class="btn" id="continueBtn">Continue ♡</button>
-        </div>
       </article>
       <div class="letter-petals front" id="petalsFront"></div>
     </div>
@@ -772,7 +754,6 @@ const CONFIG = {
   typingStartDelay: 350,        // ms — pause avant le début de l'écriture, une fois la lettre posée
   typingCharsPerSecond: 32,     // 25–40 caractères / seconde
   typingJitter: 0.35,           // variation aléatoire du rythme (0 = régulier, 1 = très irrégulier)
-  continueButtonDelay: 500,     // ms — délai avant l'apparition du bouton, une fois l'écriture finie
 
   // --- Pétales ---
   ambientPetalCount: 6,         // pétales de fond, en continu, très lents
@@ -801,7 +782,7 @@ Je t'aime de tout mon cœur, mon ange.
 
 Forever yours )))
 
-Ton Ruben ❤️
+Ton Ruben ❤️`;
 
 /* ==========================================================================
    INITIALISATION DU TEXTE D'EN-TÊTE
@@ -1141,8 +1122,6 @@ const lockedCard    = document.getElementById("lockedCard");
 const letterCard    = document.getElementById("letterCard");
 const letterTextEl  = document.getElementById("letterText");
 const typeCursor    = document.getElementById("typeCursor");
-const continueWrap  = document.getElementById("continueWrap");
-const continueBtn   = document.getElementById("continueBtn");
 const petalsBehind  = document.getElementById("petalsBehind");
 const petalsFront   = document.getElementById("petalsFront");
 
@@ -1220,7 +1199,6 @@ function startTypewriter() {
     if (i >= chars.length) {
       typeCursor.classList.add("done");
       stopWritingPetals();
-      setTimeout(showContinueButton, CONFIG.continueButtonDelay);
       return;
     }
     letterTextEl.textContent += chars[i];
@@ -1233,17 +1211,6 @@ function startTypewriter() {
 
   typeNext();
 }
-
-function showContinueButton() {
-  continueWrap.classList.add("show");
-}
-
-continueBtn.addEventListener("click", () => {
-  // point d'accroche pour la suite de l'expérience —
-  // pour l'instant, un petit remerciement discret
-  continueBtn.disabled = true;
-  continueBtn.textContent = "♡";
-});
 </script>
 
 </body>
