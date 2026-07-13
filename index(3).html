@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>solve our little picture ♡</title>
+
+<style>
+/* ============================================================
+   TOKENS — palette douce et romantique
+   ============================================================ */
+:root{
+  --cream:        #fbf6f0;
+  --cream-deep:   #f4eade;
+  --beige:        #efe1d0;
+  --pink:         #f2c9d3;
+  --pink-soft:    #f8dde4;
+  --pink-strong:  #e2a0b6;
+  --rose-line:    #d98ca6;
+  --gray:         #8c8177;
+  --ink:          #4a3f3a;
+  --white:        #ffffff;
+
+  --font-display: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', serif;
+  --font-body:    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-script:  'Segoe Script', 'Bradley Hand', 'Brush Script MT', 'Lucida Handwriting', cursive;
+
+  --shadow-soft:  0 10px 30px rgba(74,63,58,0.08);
+  --shadow-tile:  0 4px 14px rgba(74,63,58,0.12);
+  --radius-lg:    22px;
+  --radius-md:    14px;
+  --radius-sm:    8px;
+}
+
+*{ box-sizing:border-box; }
+
+html,body{
+  margin:0;
+  padding:0;
+  min-height:100%;
+  background:var(--cream);
+  color:var(--ink);
+  font-family:var(--font-body);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+body{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:6vh 5vw 10vh;
+  min-height:100vh;
+}
+
+::selection{ background:var(--pink); color:var(--ink); }
+
+/* Focus visible partout, pour accessibilité clavier */
+:focus-visible{
+  outline:3px solid var(--rose-line);
+  outline-offset:3px;
+  border-radius:6px;
+}
+
+/* ============================================================
+   DÉCOR — fleurs roses translucides dans les coins
+   ============================================================ */
+.corner-flower{
+  position:fixed;
+  width:min(38vw, 320px);
+  height:min(38vw, 320px);
+  pointer-events:none;
+  opacity:0.35;
+  z-index:0;
+}
+.corner-flower.top-left{ top:-8%; left:-8%; }
+.corner-flower.bottom-right{ bottom:-8%; right:-8%; transform:rotate(180deg); }
+
+.petal{
+  position:absolute;
+  width:46%;
+  height:70%;
+  background:radial-gradient(ellipse at 50% 20%, var(--pink-strong), var(--pink) 60%, transparent 75%);
+  border-radius:60% 40% 65% 35% / 55% 45% 55% 45%;
+  top:15%;
+  left:27%;
+  transform-origin:50% 100%;
+}
+.petal:nth-child(1){ transform:rotate(0deg); }
+.petal:nth-child(2){ transform:rotate(72deg); }
+.petal:nth-child(3){ transform:rotate(144deg); }
+.petal:nth-child(4){ transform:rotate(216deg); }
+.petal:nth-child(5){ transform:rotate(288deg); }
+.flower-center{
+  position:absolute;
+  width:16%;
+  height:16%;
+  top:42%;
+  left:42%;
+  background:radial-gradient(circle, var(--pink-strong), var(--rose-line));
+  border-radius:50%;
+}
+
+/* ============================================================
+   LAYOUT GÉNÉRAL
+   ============================================================ */
+.stage{
+  position:relative;
+  z-index:1;
+  width:100%;
+  max-width:560px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:2.4rem;
+}
+
+.screen{
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:1.6rem;
+  animation:fadeIn .8s ease both;
+}
+
+@keyframes fadeIn{
+  from{ opacity:0; transform:translateY(14px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+.hidden{ display:none !important; }
+
+/* ============================================================
+   EN-TÊTE / TITRE
+   ============================================================ */
+.title{
+  font-family:var(--font-display);
+  font-size:clamp(1.5rem, 4.4vw, 2.3rem);
+  font-weight:400;
+  letter-spacing:0.02em;
+  text-align:center;
+  color:var(--ink);
+  margin:0;
+}
+
+.subtitle{
+  font-family:var(--font-body);
+  font-size:0.95rem;
+  color:var(--gray);
+  text-align:center;
+  line-height:1.6;
+  max-width:420px;
+  margin:0;
+}
+
+/* ============================================================
+   ÉCRAN "DATE GATE"
+   ============================================================ */
+.gate-card{
+  background:var(--white);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);
+  padding:2.6rem 2rem;
+  width:100%;
+  max-width:420px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:1.4rem;
+}
+
+.gate-icon{
+  font-size:2rem;
+  color:var(--pink-strong);
+}
+
+.gate-label{
+  font-size:0.9rem;
+  color:var(--gray);
+  margin:0;
+}
+
+.gate-form{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:1rem;
+  width:100%;
+}
+
+input[type="date"]{
+  font-family:var(--font-body);
+  font-size:1rem;
+  color:var(--ink);
+  background:var(--cream);
+  border:1.5px solid var(--beige);
+  border-radius:var(--radius-md);
+  padding:0.85rem 1.1rem;
+  width:100%;
+  max-width:240px;
+  transition:border-color .25s ease, box-shadow .25s ease;
+}
+input[type="date"]:hover{ border-color:var(--pink-strong); }
+input[type="date"]:focus{
+  border-color:var(--rose-line);
+  box-shadow:0 0 0 4px rgba(217,140,166,0.15);
+}
+
+.btn{
+  font-family:var(--font-body);
+  font-size:0.95rem;
+  font-weight:600;
+  letter-spacing:0.02em;
+  color:var(--white);
+  background:linear-gradient(135deg, var(--pink-strong), var(--rose-line));
+  border:none;
+  border-radius:999px;
+  padding:0.8rem 2.2rem;
+  cursor:pointer;
+  box-shadow:0 6px 16px rgba(217,140,166,0.35);
+  transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+.btn:hover{ transform:translateY(-2px); filter:brightness(1.04); }
+.btn:active{ transform:translateY(0); }
+
+.gate-error{
+  font-size:0.85rem;
+  color:var(--rose-line);
+  min-height:1.2em;
+  margin:0;
+  opacity:0;
+  transition:opacity .25s ease;
+}
+.gate-error.show{ opacity:1; }
+
+@keyframes shake{
+  0%,100%{ transform:translateX(0); }
+  20%{ transform:translateX(-8px); }
+  40%{ transform:translateX(7px); }
+  60%{ transform:translateX(-5px); }
+  80%{ transform:translateX(4px); }
+}
+.shake{ animation:shake .45s ease; }
+
+/* ============================================================
+   PUZZLE
+   ============================================================ */
+.puzzle-wrapper{
+  position:relative;
+  width:min(90vw, 460px);
+  aspect-ratio:1/1;
+}
+
+.puzzle-grid{
+  display:grid;
+  width:100%;
+  height:100%;
+  gap:6px;
+  background:var(--beige);
+  padding:6px;
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);
+  position:relative;
+}
+
+.tile{
+  position:relative;
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  overflow:hidden;
+  box-shadow:var(--shadow-tile);
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s ease, filter .25s ease;
+  background-repeat:no-repeat;
+  will-change:transform;
+}
+.tile:hover{ transform:scale(1.03); filter:brightness(1.03); }
+.tile.selected{
+  transform:scale(0.94);
+  box-shadow:0 0 0 3px var(--rose-line), 0 0 18px rgba(217,140,166,0.55);
+}
+.tile.swap-hidden{ opacity:0; pointer-events:none; }
+.tile.locked{ cursor:default; }
+.tile.solved-pop{
+  animation:solvedPop .5s ease;
+}
+@keyframes solvedPop{
+  0%{ transform:scale(1); }
+  40%{ transform:scale(1.05); }
+  100%{ transform:scale(1); }
+}
+
+.tile-ghost{
+  position:fixed;
+  border-radius:var(--radius-sm);
+  box-shadow:0 10px 26px rgba(74,63,58,0.28);
+  z-index:50;
+  pointer-events:none;
+  background-repeat:no-repeat;
+  transition:transform .48s cubic-bezier(.22,.68,.36,1), box-shadow .48s ease;
+}
+
+.puzzle-fadeout{
+  animation:puzzleZoomOut var(--success-duration, 1.8s) ease forwards;
+}
+@keyframes puzzleZoomOut{
+  0%{   transform:scale(1);    opacity:1; }
+  55%{  transform:scale(1.05); opacity:1; }
+  100%{ transform:scale(1.12); opacity:0; }
+}
+
+/* pluie de pétales / cœurs — CSS uniquement */
+.petal-rain{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  overflow:hidden;
+  z-index:40;
+}
+.falling-petal{
+  position:absolute;
+  top:-40px;
+  font-size:1.3rem;
+  color:var(--pink-strong);
+  opacity:0.9;
+  animation-name:fallDown;
+  animation-timing-function:ease-in;
+  animation-fill-mode:forwards;
+}
+@keyframes fallDown{
+  0%{   transform:translateY(0) rotate(0deg);   opacity:0.9; }
+  100%{ transform:translateY(110vh) rotate(340deg); opacity:0; }
+}
+
+/* ============================================================
+   LETTRE
+   ============================================================ */
+.letter-zone{
+  width:100%;
+  display:flex;
+  justify-content:center;
+}
+
+.locked-card{
+  background:var(--cream-deep);
+  border:1.5px dashed var(--pink-strong);
+  border-radius:var(--radius-lg);
+  padding:2.2rem 1.6rem;
+  width:100%;
+  max-width:420px;
+  text-align:center;
+  color:var(--gray);
+  font-size:1rem;
+  letter-spacing:0.02em;
+}
+
+.letter-card{
+  background:var(--white);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);
+  padding:2.6rem 2rem;
+  width:100%;
+  max-width:460px;
+  opacity:0;
+  transform:translateY(24px);
+  transition:opacity .9s ease, transform .9s cubic-bezier(.22,.68,.36,1);
+}
+.letter-card.revealed{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.letter-heart{
+  text-align:center;
+  color:var(--pink-strong);
+  font-size:1.5rem;
+  margin-bottom:0.6rem;
+}
+
+.letter-body{
+  font-family:var(--font-script);
+  font-size:1.35rem;
+  line-height:1.9;
+  color:var(--ink);
+}
+
+.letter-line{
+  margin:0 0 0.9rem 0;
+  opacity:0;
+  transform:translateY(10px);
+  animation:lineReveal .7s ease forwards;
+}
+@keyframes lineReveal{
+  to{ opacity:1; transform:translateY(0); }
+}
+
+.letter-signature{
+  text-align:right;
+  font-family:var(--font-script);
+  font-size:1.5rem;
+  color:var(--rose-line);
+  margin-top:1.2rem;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width:520px){
+  .gate-card, .letter-card, .locked-card{ padding:1.8rem 1.3rem; }
+  .letter-body{ font-size:1.2rem; }
+}
+
+/* Respecte les préférences de mouvement réduit */
+@media (prefers-reduced-motion: reduce){
+  *{
+    animation-duration:0.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Décor fixe : fleurs roses translucides -->
+<div class="corner-flower top-left" aria-hidden="true">
+  <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+  <div class="petal"></div><div class="petal"></div>
+  <div class="flower-center"></div>
+</div>
+<div class="corner-flower bottom-right" aria-hidden="true">
+  <div class="petal"></div><div class="petal"></div><div class="petal"></div>
+  <div class="petal"></div><div class="petal"></div>
+  <div class="flower-center"></div>
+</div>
+
+<main class="stage">
+
+  <h1 class="title" id="mainTitle"></h1>
+  <p class="subtitle" id="mainSubtitle"></p>
+
+  <!-- ÉCRAN 1 : la porte de la date -->
+  <section class="screen" id="gateScreen">
+    <div class="gate-card">
+      <div class="gate-icon" aria-hidden="true">♡</div>
+      <p class="gate-label">Quelle est la date qui compte, pour nous ?</p>
+      <form class="gate-form" id="gateForm">
+        <input
+          type="date"
+          id="dateInput"
+          aria-label="Entrer la date"
+          required
+        >
+        <button type="submit" class="btn">Entrer</button>
+        <p class="gate-error" id="gateError">Ce n'est pas encore la bonne date... essaie encore ♡</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ÉCRAN 2 : le puzzle (caché au départ) -->
+  <section class="screen hidden" id="puzzleScreen">
+    <div class="puzzle-wrapper" id="puzzleWrapper">
+      <div class="puzzle-grid" id="puzzleGrid"></div>
+    </div>
+
+    <div class="letter-zone">
+      <div class="locked-card" id="lockedCard">🔒 Locked</div>
+      <article class="letter-card" id="letterCard"></article>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ==========================================================================
+   CONFIG — variables à modifier facilement
+   ========================================================================== */
+const CONFIG = {
+  rows: 4,
+  cols: 4,
+  image: "images/photo.jpg",
+  title: "solve our little picture ♡",
+  subtitle: "Tap two tiles to swap them. The page unlocks when the picture is complete.",
+  lockedText: "🔒 Locked",
+  successDuration: 1800,     // en ms
+
+  // Date à deviner pour ouvrir la page (format AAAA-MM-JJ)
+  requiredDate: "2025-07-13",
+  gateWrongMessage: "Ce n'est pas encore la bonne date... essaie encore ♡"
+};
+
+// Musique en option (désactivée par défaut)
+const ENABLE_MUSIC = false;
+const MUSIC_SRC = "music.mp3";
+
+/* ==========================================================================
+   LETTRE — à modifier ici
+   ========================================================================== */
+const LETTER = `
+My love,
+
+Every day with you feels like a little miracle I get to unwrap all over again.
+
+You are the calm in my noisy days, the laugh I look forward to, the hand I want to hold through everything ordinary and everything extraordinary.
+
+This little puzzle was never really about the picture. It was just an excuse to make you smile for a few minutes, the same way you make me smile every single day.
+
+Thank you for choosing me, again and again.
+
+Forever yours.
+`;
+
+/* ==========================================================================
+   INITIALISATION DU TEXTE D'EN-TÊTE
+   ========================================================================== */
+document.getElementById("mainTitle").textContent = CONFIG.title;
+document.getElementById("mainSubtitle").textContent = CONFIG.subtitle;
+document.getElementById("lockedCard").textContent = CONFIG.lockedText;
+document.documentElement.style.setProperty("--success-duration", (CONFIG.successDuration / 1000) + "s");
+
+/* ==========================================================================
+   ÉTAPE 1 : LA PORTE DE LA DATE
+   ========================================================================== */
+const gateScreen  = document.getElementById("gateScreen");
+const puzzleScreen= document.getElementById("puzzleScreen");
+const gateForm    = document.getElementById("gateForm");
+const dateInput   = document.getElementById("dateInput");
+const gateError   = document.getElementById("gateError");
+const gateCard    = document.querySelector(".gate-card");
+
+gateError.textContent = CONFIG.gateWrongMessage;
+
+gateForm.addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  if (dateInput.value === CONFIG.requiredDate) {
+    // bonne date : on passe à l'étape du puzzle
+    gateScreen.classList.add("hidden");
+    puzzleScreen.classList.remove("hidden");
+    initPuzzle();
+    maybeStartMusic();
+  } else {
+    // mauvaise date : petite secousse + message
+    gateError.classList.add("show");
+    gateCard.classList.remove("shake");
+    // force reflow pour rejouer l'animation
+    void gateCard.offsetWidth;
+    gateCard.classList.add("shake");
+  }
+});
+
+/* ==========================================================================
+   MUSIQUE (optionnelle)
+   ========================================================================== */
+let musicStarted = false;
+let audioEl = null;
+
+function maybeStartMusic() {
+  if (!ENABLE_MUSIC || musicStarted) return;
+  audioEl = new Audio(MUSIC_SRC);
+  audioEl.loop = true;
+  audioEl.volume = 0.5;
+  const startOnce = () => {
+    if (musicStarted) return;
+    musicStarted = true;
+    audioEl.play().catch(() => {/* lecture bloquée par le navigateur, on ignore */});
+    document.removeEventListener("click", startOnce);
+    document.removeEventListener("keydown", startOnce);
+  };
+  document.addEventListener("click", startOnce);
+  document.addEventListener("keydown", startOnce);
+}
+
+/* ==========================================================================
+   ÉTAPE 2 : LE PUZZLE (échange de deux cases, pas de case vide)
+   ========================================================================== */
+const grid    = document.getElementById("puzzleGrid");
+const wrapper = document.getElementById("puzzleWrapper");
+
+const rows = CONFIG.rows;
+const cols = CONFIG.cols;
+const total = rows * cols;
+
+// positions[i] = index de la pièce actuellement affichée à la position i
+let positions = [];
+let selectedIndex = null;
+let locked = false;
+
+function initPuzzle() {
+  grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  grid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  grid.innerHTML = "";
+
+  positions = Array.from({ length: total }, (_, i) => i);
+  shufflePositions();
+
+  for (let i = 0; i < total; i++) {
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.tabIndex = 0;
+    tile.setAttribute("role", "button");
+    tile.setAttribute("aria-label", "Pièce du puzzle");
+    tile.dataset.position = i;
+
+    tile.addEventListener("click", () => handleTileActivate(i));
+    tile.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleTileActivate(i);
+      }
+    });
+
+    grid.appendChild(tile);
+  }
+
+  renderAllTiles();
+}
+
+// Mélange par échanges successifs : toujours résoluble puisqu'un échange
+// est sa propre opération inverse (pas de contrainte de parité).
+function shufflePositions() {
+  const shuffleCount = total * 6;
+  do {
+    for (let k = 0; k < shuffleCount; k++) {
+      const a = Math.floor(Math.random() * total);
+      const b = Math.floor(Math.random() * total);
+      [positions[a], positions[b]] = [positions[b], positions[a]];
+    }
+  } while (isSolved()); // on s'assure que ce n'est pas déjà résolu
+}
+
+function pieceBackgroundStyle(pieceIndex) {
+  const pieceRow = Math.floor(pieceIndex / cols);
+  const pieceCol = pieceIndex % cols;
+  const posX = cols > 1 ? (pieceCol / (cols - 1)) * 100 : 0;
+  const posY = rows > 1 ? (pieceRow / (rows - 1)) * 100 : 0;
+  return {
+    backgroundImage: `url("${CONFIG.image}")`,
+    backgroundSize: `${cols * 100}% ${rows * 100}%`,
+    backgroundPosition: `${posX}% ${posY}%`
+  };
+}
+
+function applyTileStyle(tileEl, pieceIndex) {
+  const style = pieceBackgroundStyle(pieceIndex);
+  tileEl.style.backgroundImage = style.backgroundImage;
+  tileEl.style.backgroundSize = style.backgroundSize;
+  tileEl.style.backgroundPosition = style.backgroundPosition;
+  tileEl.dataset.piece = pieceIndex;
+}
+
+function renderAllTiles() {
+  const tiles = grid.children;
+  for (let i = 0; i < total; i++) {
+    applyTileStyle(tiles[i], positions[i]);
+  }
+}
+
+function isSolved() {
+  return positions.every((pieceIndex, i) => pieceIndex === i);
+}
+
+/* ------------------ Sélection et échange (avec animation "vol") ------------------ */
+function handleTileActivate(index) {
+  if (locked) return;
+  const tiles = grid.children;
+  const tileEl = tiles[index];
+
+  if (selectedIndex === null) {
+    selectedIndex = index;
+    tileEl.classList.add("selected");
+    return;
+  }
+
+  if (selectedIndex === index) {
+    tileEl.classList.remove("selected");
+    selectedIndex = null;
+    return;
+  }
+
+  const firstIndex = selectedIndex;
+  selectedIndex = null;
+  tiles[firstIndex].classList.remove("selected");
+
+  swapWithAnimation(firstIndex, index);
+}
+
+function swapWithAnimation(indexA, indexB) {
+  const tiles = grid.children;
+  const tileA = tiles[indexA];
+  const tileB = tiles[indexB];
+
+  const rectA = tileA.getBoundingClientRect();
+  const rectB = tileB.getBoundingClientRect();
+
+  // ghosts pour l'effet visuel de "vol" entre les deux cases
+  const ghostA = createGhost(tileA, rectA);
+  const ghostB = createGhost(tileB, rectB);
+  document.body.appendChild(ghostA);
+  document.body.appendChild(ghostB);
+
+  tileA.classList.add("swap-hidden");
+  tileB.classList.add("swap-hidden");
+
+  // on échange déjà les données, les vraies cases seront correctes
+  // une fois révélées après l'animation
+  [positions[indexA], positions[indexB]] = [positions[indexB], positions[indexA]];
+  applyTileStyle(tileA, positions[indexA]);
+  applyTileStyle(tileB, positions[indexB]);
+
+  // force reflow avant de lancer la transition des ghosts
+  void ghostA.offsetWidth;
+
+  const dxAtoB = rectB.left - rectA.left;
+  const dyAtoB = rectB.top - rectA.top;
+  const dxBtoA = rectA.left - rectB.left;
+  const dyBtoA = rectA.top - rectB.top;
+
+  ghostA.style.transform = `translate(${dxAtoB}px, ${dyAtoB}px) scale(1.06) rotate(4deg)`;
+  ghostB.style.transform = `translate(${dxBtoA}px, ${dyBtoA}px) scale(1.06) rotate(-4deg)`;
+
+  let finished = 0;
+  const onDone = () => {
+    finished++;
+    if (finished < 2) return;
+    ghostA.remove();
+    ghostB.remove();
+    tileA.classList.remove("swap-hidden");
+    tileB.classList.remove("swap-hidden");
+    tileA.classList.add("solved-pop");
+    tileB.classList.add("solved-pop");
+    setTimeout(() => {
+      tileA.classList.remove("solved-pop");
+      tileB.classList.remove("solved-pop");
+    }, 500);
+
+    checkWin();
+  };
+
+  ghostA.addEventListener("transitionend", onDone, { once: true });
+  ghostB.addEventListener("transitionend", onDone, { once: true });
+}
+
+function createGhost(sourceTile, rect) {
+  const ghost = document.createElement("div");
+  ghost.className = "tile-ghost";
+  ghost.style.left = rect.left + "px";
+  ghost.style.top = rect.top + "px";
+  ghost.style.width = rect.width + "px";
+  ghost.style.height = rect.height + "px";
+  ghost.style.backgroundImage = sourceTile.style.backgroundImage;
+  ghost.style.backgroundSize = sourceTile.style.backgroundSize;
+  ghost.style.backgroundPosition = sourceTile.style.backgroundPosition;
+  return ghost;
+}
+
+/* ------------------ Victoire ------------------ */
+function checkWin() {
+  if (!isSolved()) return;
+  locked = true;
+
+  const tiles = Array.from(grid.children);
+  tiles.forEach(t => t.classList.add("locked"));
+
+  spawnPetalRain();
+
+  wrapper.classList.add("puzzle-fadeout");
+
+  setTimeout(() => {
+    wrapper.style.display = "none";
+    unlockLetter();
+  }, CONFIG.successDuration);
+}
+
+function spawnPetalRain() {
+  const rain = document.createElement("div");
+  rain.className = "petal-rain";
+  document.body.appendChild(rain);
+
+  const symbols = ["♡", "❀", "✿", "♥"];
+  const count = 26;
+
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement("span");
+    p.className = "falling-petal";
+    p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+    p.style.left = Math.random() * 100 + "vw";
+    const duration = 2.2 + Math.random() * 1.6;
+    const delay = Math.random() * 0.6;
+    p.style.animationDuration = duration + "s";
+    p.style.animationDelay = delay + "s";
+    p.style.fontSize = (1 + Math.random() * 1.2) + "rem";
+    rain.appendChild(p);
+  }
+
+  setTimeout(() => rain.remove(), 4500);
+}
+
+/* ==========================================================================
+   ÉTAPE 3 : DÉBLOCAGE DE LA LETTRE
+   ========================================================================== */
+const lockedCard = document.getElementById("lockedCard");
+const letterCard = document.getElementById("letterCard");
+
+function buildLetterMarkup() {
+  const rawLines = LETTER.trim().split("\n").map(l => l.trim());
+  let html = `<div class="letter-heart" aria-hidden="true">♡</div><div class="letter-body">`;
+  let lineCount = 0;
+
+  rawLines.forEach((line) => {
+    if (line.length === 0) return;
+    lineCount++;
+    const isSignature = /forever yours/i.test(line) || /^-\s?/.test(line);
+    const delay = (lineCount * 0.35).toFixed(2);
+    if (isSignature) {
+      html += `<p class="letter-line letter-signature" style="animation-delay:${delay}s">${escapeHtml(line)}</p>`;
+    } else {
+      html += `<p class="letter-line" style="animation-delay:${delay}s">${escapeHtml(line)}</p>`;
+    }
+  });
+
+  html += `</div>`;
+  return html;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+letterCard.innerHTML = buildLetterMarkup();
+
+function unlockLetter() {
+  lockedCard.style.transition = "opacity .5s ease";
+  lockedCard.style.opacity = "0";
+  setTimeout(() => {
+    lockedCard.style.display = "none";
+    letterCard.classList.add("revealed");
+  }, 500);
+}
+</script>
+
+</body>
+</html>
